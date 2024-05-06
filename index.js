@@ -5,5 +5,5 @@ const { scheduleBirthdays } = require('./handlers');
 scheduleBirthdays();
 
 server.listen(8000, () => {
-  console.log('Server Started');
+  console.log('Server Started at port: 8000');
 })

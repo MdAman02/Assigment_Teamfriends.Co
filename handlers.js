@@ -1,17 +1,18 @@
 const cron = require('node-cron');
 const moment = require('moment');
-const fs = require('fs');
+const uniqid = require('uniqid');
 const { registerCustomer, storeWishRecord, getCustomers } = require('./storage/repository');
 
 const sendWishEmail = customer => {
+  console.log(`Sending Wish to ${customer.name}`);
   const { name, ID } = customer;
   // Demo Email Sending
   storeWishRecord({
-    ID,
+    customerID: ID,
     name,
-    email: {
+    emailDetails: {
       Title: 'Birthday',
-      Body: 'Happy Birthday!!'
+      Body: `Happy Birthday ${customer.name}!!`
     }
   })
 }
@@ -20,7 +21,7 @@ const scheduleBirthday = customer => {
   const { birthday } = customer;
   const date = moment(birthday);
   
-  cron.schedule(`* * * ${date.daysInMonth()} ${date.month()} *`, () => {
+  cron.schedule(`1 0 ${date.date()} ${date.month() + 1} *`, () => {
     sendWishEmail(customer);
   });
 }
@@ -32,15 +33,26 @@ exports.scheduleBirthdays = () => {
   });
 }
 
+const validateRequest = req => {
+  const { body } = req;
+  if (!body.name || !body.birthday || !body.email) {
+    const error = new Error('Request body invalid');
+    error.status = 400;
+    throw error;
+  }
+  const customers = getCustomers();
+  if (customers.some(cust => cust.email === body.email)) {
+    const error = new Error('Customer already scheduled');
+    error.status = 400;
+    throw error;
+  }
+}
+
 exports.handleRegister = (req, res, next) => {
   try {
     const { body } = req;
-    if (!body.name || !body.birthday || !body.email)
-      next({
-        status: 400,
-        message: 'Request Body Error'
-      });
-    if (!customer.ID) customer.ID = uniqid('cust_');
+    validateRequest(req);
+    if (!body.ID) body.ID = uniqid('cust_');
 
     scheduleBirthday(body);
     registerCustomer(body);

@@ -12,14 +12,16 @@ app.use(helmet());
 
 app.use((req, res, next) => {
   if (!req.is('application/json') )
-    next('Wrong Content-Type header')
+    next('Wrong Content-Type header');
+  else
+    next();
 });
 
 app.use('/', routes);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500).send({
-    message: `Request Failed: ${err.message}`,    
+    message: `Request Failed: ${err.message}`,
   })
 });
 

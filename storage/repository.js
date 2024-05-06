@@ -1,10 +1,8 @@
 const fs = require('fs');
-const uniqid = require('uniqid');
 
 exports.registerCustomer = customer => {
   const fileBuf = fs.readFileSync('./customers.json');
-  if (!fileBuf.length) return;
-  const customers = JSON.parse(fileBuf) || [];
+  const customers = fileBuf.length ? JSON.parse(fileBuf) : [];
   customers.push(customer);
   fs.writeFileSync('./customers.json', JSON.stringify(customers));
   return;
